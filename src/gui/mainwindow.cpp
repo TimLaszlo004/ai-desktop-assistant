@@ -59,6 +59,7 @@ MainWindow::~MainWindow()
 
     delete process;
     delete listener_process;
+    delete storage_process;
 
     for (auto &f: functions) {
         delete f;
