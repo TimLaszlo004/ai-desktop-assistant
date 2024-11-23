@@ -1,0 +1,99 @@
+{
+    "application": {
+        "command": "typer.exe PRESS{cmd}RELEASE{cmd}SLEEP{1}TYPE{{0}}SLEEP{1}PRESS{enter}RELEASE{enter}",
+        "description": "Opens the defined application",
+        "destructive": true,
+        "parameters": {
+            "application": {
+                "description": "the application to open",
+                "type": "string"
+            }
+        },
+        "required": [
+            "application"
+        ]
+    },
+    "calculator": {
+        "command": "calc",
+        "description": "Opens calculator to solve math problems",
+        "destructive": true,
+        "parameters": {
+        },
+        "required": [
+        ]
+    },
+    "fileopen": {
+        "command": "py -3.11 finder.py \"{0}\" --acceptance 5",
+        "description": "Finds and opens a file from the system with the default application",
+        "destructive": true,
+        "parameters": {
+            "file": {
+                "description": "The file that needs to be found and opened",
+                "type": "string"
+            }
+        },
+        "required": [
+            "file"
+        ]
+    },
+    "filesearch": {
+        "command": "py -3.11 finder.py \"{0}\" --acceptance 5 --explorer",
+        "description": "Searches a file in the system",
+        "destructive": true,
+        "parameters": {
+            "file": {
+                "description": "The file that needs to be found",
+                "type": "string"
+            }
+        },
+        "required": [
+            "file"
+        ]
+    },
+    "google": {
+        "command": "cmd /c start  https://google.com/search?q={0}",
+        "description": "Searches in google",
+        "destructive": false,
+        "parameters": {
+            "phrase": {
+                "description": "The phrase to search for",
+                "type": "string"
+            }
+        },
+        "required": [
+            "phrase"
+        ]
+    },
+    "mute": {
+        "command": "typer.exe PRESS{media_volume_mute}RELEASE{media_volume_mute}",
+        "description": "Mutes the audio output",
+        "destructive": false,
+        "parameters": {
+        },
+        "required": [
+        ]
+    },
+    "volumeup": {
+        "command": "typer.exe PRESS{media_volume_up}RELEASE{media_volume_up}",
+        "description": "Increases the volume",
+        "destructive": false,
+        "parameters": {
+        },
+        "required": [
+        ]
+    },
+    "youtube": {
+        "command": "cmd /c start https://www.youtube.com/results?search_query={0}",
+        "description": "Opens youtube in the browser",
+        "destructive": false,
+        "parameters": {
+            "search_for": {
+                "description": "The phrase to search for in youtube",
+                "type": "string"
+            }
+        },
+        "required": [
+            "search_for"
+        ]
+    }
+}

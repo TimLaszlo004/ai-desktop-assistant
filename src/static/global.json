@@ -1,0 +1,7 @@
+{
+    "api_key": "YOUR_OPENAI_API_KEY",
+    "input_mute_level": "0",
+    "max_tokens": "2048",
+    "speaker": "True",
+    "working_dir": "THE_DIRECTORY_WHERE_YOUR_EXECUTABLE_IS_LOCATED"
+}

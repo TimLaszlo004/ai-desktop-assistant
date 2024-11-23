@@ -1,0 +1,30 @@
+{
+    "actuator": {
+        "command": "py -3.11 handler.py map.json {function:name} --parameters {function:arguments}",
+        "trigger_folder": "{GLOBAL:working_dir}\\tmp_chat\\temp{}.json"
+    },
+    "listener": {
+        "command": "py -3.11 webrtcvadlistener.py --target_directory {GLOBAL:working_dir}\\tmp_audio\\ --input_mute_level {GLOBAL:input_mute_level}",
+        "trigger_folder": ""
+    },
+    "reader": {
+        "command": "py -3.11 reader.py \"{text:content}\" --api {GLOBAL:api_key}",
+        "trigger_folder": "{GLOBAL:working_dir}\\tmp_chat\\temp{}.json"
+    },
+    "sender": {
+        "command": "py -3.11 chat.py {} {GLOBAL:working_dir}\\tmp_chat\\ --api {GLOBAL:api_key} --function_map {GLOBAL:working_dir}\\map.json --max_tokens {GLOBAL:max_tokens}",
+        "trigger_folder": "{GLOBAL:working_dir}\\tmp_transcribed\\temp{}.txt"
+    },
+    "storage": {
+        "command": "py -3.11 filestorage.py",
+        "trigger_folder": ""
+    },
+    "transcriber": {
+        "command": "py -3.11 whisp.py {} {GLOBAL:working_dir}\\tmp_transcribed\\ --api {GLOBAL:api_key}",
+        "trigger_folder": "{GLOBAL:working_dir}\\tmp_audio\\temp{}.wav"
+    },
+    "trigger": {
+        "command": "py -3.11 trigger.py {GLOBAL:working_dir}\\commands.json {GLOBAL:working_dir}\\global.json --speaker {GLOBAL:speaker}",
+        "trigger_folder": ""
+    }
+}
