@@ -1,5 +1,5 @@
 # Desktop application to assist you with anything you want help with
-This is a highly customizabe, real-time extendable AI assistant application. It leverages OpenAI's function calling along with Whisper (through OpenAI API), Google's WebRTCVAD and text-to-speech.
+This is a highly customizabe, real-time extendable AI assistant application. It leverages OpenAI's function calling along with Whisper (through OpenAI API), Google's WebRTCVAD and text-to-speech models.
 Functions can be defined, which will then be executable on your machine! You can add, edit and remove functions as you like, real-time. The whole applicaation can be used through a GUI made with Qt.
 
 
