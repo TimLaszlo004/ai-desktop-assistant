@@ -82,6 +82,7 @@ MainWindow::~MainWindow()
     delete sender;
     delete reader;
     delete actuator;
+    delete storage;
 
     if (instance == this) {
         instance = nullptr;
@@ -143,6 +144,17 @@ void MainWindow::startProcess()
 
 void MainWindow::stopProcess()
 {
+    if ( !storage_process ) {
+        qDebug() << "Cannot stop process without initialization!";
+        return;
+    }
+    if (storage_process->isOpen()) {
+        storage_process->terminate();
+        storage_process->waitForFinished(0);
+        if (storage_process->state() != QProcess::NotRunning) {
+            storage_process->kill();
+        }
+    }
     if ( !process ) {
         qDebug() << "Cannot stop process without initialization!";
         return;
@@ -164,17 +176,6 @@ void MainWindow::stopProcess()
         listener_process->waitForFinished(0);
         if (listener_process->state() != QProcess::NotRunning) {
             listener_process->kill();
-        }
-    }
-    if ( !storage_process ) {
-        qDebug() << "Cannot stop process without initialization!";
-        return;
-    }
-    if (storage_process->isOpen()) {
-        storage_process->terminate();
-        storage_process->waitForFinished(0);
-        if (storage_process->state() != QProcess::NotRunning) {
-            storage_process->kill();
         }
     }
 }
@@ -234,6 +235,7 @@ void MainWindow::on_startButton_clicked()
         ui->speakerButton->setDisabled(true);
         ui->speakerButton->setToolTip(QString("Only adjustable when assistant is stopped"));
         startProcess();
+        on_homeButton_clicked();
     } else {
         ui->startButton->setText(QString("START"));
         ui->startButton->setStyleSheet("QPushButton{"
@@ -348,7 +350,7 @@ void MainWindow::setupCommands()
             delete actuator;
         }
         if (storage) {
-            delete actuator;
+            delete storage;
         }
         trigger = new CCommandPane(QString("trigger"));
         listener = new CCommandPane(QString("listener"));
@@ -605,6 +607,7 @@ bool MainWindow::isAllReplacementOK()
             newPair->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed);
             ui->variablesParentLayout->addWidget(newPair, 1);
             variables.push_back(newPair);
+            on_globalVariablesButton_clicked();
         }
         return false;
     } catch(...) {
@@ -696,6 +699,9 @@ void MainWindow::on_saveFunctionsButton_clicked()
 
 void MainWindow::on_buttonBox_accepted()
 {
+    if (ui->plainTextEdit->toPlainText() == "") {
+        return;
+    }
     if (!isRunning) {
         stateWarning();
     }
@@ -793,6 +799,7 @@ void MainWindow::on_saveModulesButton_clicked()
     QJsonObject senderObj = jsonObj["sender"].toObject();
     QJsonObject readerObj = jsonObj["reader"].toObject();
     QJsonObject actuatorObj = jsonObj["actuator"].toObject();
+    QJsonObject storageObj = jsonObj["storage"].toObject();
 
 
     triggerObj["command"] = trigger->getCommand();
@@ -813,12 +820,16 @@ void MainWindow::on_saveModulesButton_clicked()
     actuatorObj["command"] = actuator->getCommand();
     actuatorObj["trigger_folder"] = actuator->getTrigger();
 
+    storageObj["command"] = storage->getCommand();
+    storageObj["trigger_folder"] = storage->getTrigger();
+
     jsonObj["trigger"] = triggerObj;
     jsonObj["listener"] = listenerObj;
     jsonObj["transcriber"] = transcriberObj;
     jsonObj["sender"] = senderObj;
     jsonObj["reader"] = readerObj;
     jsonObj["actuator"] = actuatorObj;
+    jsonObj["storage"] = storageObj;
 
     writeJson(commandsFile, jsonObj);
 }
