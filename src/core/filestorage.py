@@ -1,39 +1,45 @@
 from flask import Flask, request, jsonify, send_file
 from io import BytesIO
 import threading
-from win11toast import toast
+
+import signal
+import sys
+
+def handle_signal(signum, frame):
+    print(f"Received signal {signum}, cleaning up...")
+    sys.exit(0)
+
+signal.signal(signal.SIGTERM, handle_signal)
+signal.signal(signal.SIGINT, handle_signal)
+
+LOGGING = False
 
 def log(msg:str):
-    with open('logfile.txt', 'a') as file:
-        file.write(msg)
-        file.write('\n')
+    if LOGGING:
+        with open('logfile.txt', 'a') as file:
+            file.write(msg)
+            file.write('\n')
 
 app = Flask(__name__)
 
-# In-memory file storage (Dictionary of filename -> BytesIO data)
 file_storage = {}
 
-# Lock for handling concurrency (thread-safe file access)
 storage_lock = threading.Lock()
 
-# Store file: Save binary data in memory with a filename
 @app.route('/storefile', methods=['POST'])
 def storefile():
     try:
-        # Retrieve the file from the request
         filename = request.form['filename']
         file = request.files['file']
-        file_data = file.read()  # Read the binary data of the file
+        file_data = file.read()
         
         with storage_lock:
-            # Store the file in memory
             file_storage[filename] = BytesIO(file_data)
         
         return jsonify({"message": "File stored successfully!"}), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 400
 
-# Get list of all stored files
 @app.route('/getfiles', methods=['GET'])
 def getfiles():
     with storage_lock:
@@ -41,7 +47,6 @@ def getfiles():
     
     return jsonify({"files": filenames})
 
-# Retrieve a specific file by filename
 @app.route('/getfile/<filename>', methods=['GET'])
 def getfile(filename):
     try:
@@ -49,7 +54,6 @@ def getfile(filename):
             if filename not in file_storage:
                 return jsonify({"error": "File not found!"}), 404
 
-            # Rewind the BytesIO object to the start
             file_data = file_storage[filename]
             file_data.seek(0)
 
@@ -59,7 +63,6 @@ def getfile(filename):
         log(f'SERVER ERROR: {str(e)}')
         return jsonify({"error": str(e)}), 400
 
-# Delete a specific file by filename
 @app.route('/deletefile/<filename>', methods=['DELETE'])
 def deletefile(filename):
     try:
@@ -73,8 +76,4 @@ def deletefile(filename):
         return jsonify({"error": str(e)}), 400
 
 if __name__ == '__main__':
-    try:
-        # toast('Assistant', f'Start server')
-        app.run(debug=False, threaded=True)
-    except Exception as e:
-        toast('Assistant', f'error in server: {str(e)}')
+    app.run(debug=False, threaded=True)

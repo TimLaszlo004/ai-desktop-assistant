@@ -6,11 +6,13 @@ import filemanager
 import io
 
 DEBUG = False
+LOGGING = False
 
 def log(msg:str):
-    with open('logfile.txt', 'a') as file:
-        file.write(msg)
-        file.write('\n')
+    if LOGGING:
+        with open('logfile.txt', 'a') as file:
+            file.write(msg)
+            file.write('\n')
 
 def init(arguments:list):
     try:

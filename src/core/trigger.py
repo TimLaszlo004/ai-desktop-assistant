@@ -1,8 +1,6 @@
 from os import path as pt
 import time
 import datetime
-# from watchdog.observers import Observer
-# from watchdog.events import LoggingEventHandler
 import argparse
 import json
 import subprocess
@@ -14,12 +12,20 @@ import whisp
 import reader
 import chat
 import read_json_with_globals
-# import filestorage
 import filemanager
 handled_paths = deque(maxlen=50)
 
 DEBUG = False
+LOGGING = False
 
+import signal
+import sys
+
+def handle_signal(signum, frame):
+    sys.exit(0)
+
+signal.signal(signal.SIGTERM, handle_signal)
+signal.signal(signal.SIGINT, handle_signal)
 
 local_storage = set()
 local_storage_times = set()
@@ -56,28 +62,16 @@ def delete_old_from_cache():
             
 
 with open('logfile.txt', 'w') as file:
+    if LOGGING:
         file.write('')
-def log(msg:str):
-    # print(msg)
-    pass
-    with open('logfile.txt', 'a') as file:
-        file.write(msg)
-        file.write('\n')
-log('trigger started')
-    
-def start_server():
-    # filestorage.app.run(debug=False, threaded=True)
-    # subprocess.Popen(["py", "-3.11", "filestorage.py"])
-    ...
-    
 
-try:
-    # server = threading.Thread(target=start_server)
-    # server.setDaemon(True)
-    start_server()
-    log('started file server')
-except Exception as e:
-    log(str(e))
+def log(msg:str):
+    if LOGGING:
+        with open('logfile.txt', 'a') as file:
+            file.write(msg)
+            file.write('\n')
+log('trigger started')
+
 
 parser = argparse.ArgumentParser(description='Manages other modules and writes log file (session.json)')
 parser.add_argument('commands', metavar='JSON', type=str, help='json file that contains the commands to be executed')
@@ -198,7 +192,7 @@ def call_function(modul:Modul, command:list):
             t = threading.Thread(target=whisp.run, args=(command, transcriber_data))
             t.daemon = True
             t.start()
-            # t.join()
+
         case Modul.sender:
             if sender_data == None:
                 log('INIT SENDER')
@@ -341,9 +335,7 @@ def on_file_event(src_path:str):
             return
         else:
             handled_paths.append(src_path)
-        # log(process_list)
 
-        # log(process_waiting)
 
         file = pt.basename(src_path)
 
@@ -391,23 +383,6 @@ def on_file_event(src_path:str):
         log(str(e))
 
 
-
-
-# class Event(LoggingEventHandler):
-#     handled_files = deque(maxlen=50)
-#     def on_any_event(self, event):
-#         on_file_event(event.src_path)
-
-#     def on_deleted(self, event):
-#         pass
-
-#     def on_modified(self, event):
-#         pass
-    
-#     def on_created(self, event):
-#         pass
-
-# path = listen_dir
 if DEBUG:
     from watchdog.observers import Observer
     from watchdog.events import LoggingEventHandler

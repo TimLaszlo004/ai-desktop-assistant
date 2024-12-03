@@ -1336,7 +1336,7 @@ QStatusBar
         <item>
          <widget class="QStackedWidget" name="stackedWidget">
           <property name="currentIndex">
-           <number>4</number>
+           <number>0</number>
           </property>
           <widget class="QWidget" name="homePage">
            <layout class="QVBoxLayout" name="verticalLayout_4" stretch="0,7,2,1">
@@ -1394,7 +1394,7 @@ QStatusBar
                  <x>0</x>
                  <y>0</y>
                  <width>716</width>
-                 <height>318</height>
+                 <height>300</height>
                 </rect>
                </property>
                <property name="styleSheet">
@@ -1504,7 +1504,7 @@ QLabel{background-color: #818181;}</string>
                  <x>0</x>
                  <y>0</y>
                  <width>716</width>
-                 <height>457</height>
+                 <height>439</height>
                 </rect>
                </property>
                <layout class="QVBoxLayout" name="verticalLayout_12" stretch="1">
@@ -1580,7 +1580,7 @@ QLabel{background-color: #818181;}</string>
                  <x>0</x>
                  <y>0</y>
                  <width>716</width>
-                 <height>457</height>
+                 <height>439</height>
                 </rect>
                </property>
                <layout class="QVBoxLayout" name="verticalLayout_8">
@@ -1595,7 +1595,7 @@ QLabel{background-color: #818181;}</string>
                      <x>0</x>
                      <y>0</y>
                      <width>692</width>
-                     <height>433</height>
+                     <height>415</height>
                     </rect>
                    </property>
                    <layout class="QVBoxLayout" name="verticalLayout_14">
@@ -1681,7 +1681,7 @@ QLabel{background-color: #818181;}</string>
                  <x>0</x>
                  <y>0</y>
                  <width>716</width>
-                 <height>457</height>
+                 <height>439</height>
                 </rect>
                </property>
                <layout class="QVBoxLayout" name="verticalLayout_10">
@@ -1706,8 +1706,8 @@ QLabel{background-color: #818181;}</string>
                 <rect>
                  <x>0</x>
                  <y>0</y>
-                 <width>1020</width>
-                 <height>486</height>
+                 <width>1270</width>
+                 <height>511</height>
                 </rect>
                </property>
                <layout class="QVBoxLayout" name="verticalLayout_11">
@@ -1826,7 +1826,7 @@ QLabel{background-color: #818181;}</string>
      <x>0</x>
      <y>0</y>
      <width>918</width>
-     <height>26</height>
+     <height>32</height>
     </rect>
    </property>
   </widget>

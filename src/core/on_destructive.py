@@ -8,5 +8,3 @@ def on_destructive_toast(function:str):
 
     toast('Assistant', f'Click here to allow execution of destructive function:\n{function}', on_click=accept)
     return accepted
-
-# print(on_destructive_toast("google"))

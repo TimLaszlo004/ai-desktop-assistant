@@ -1,3 +1,5 @@
+// #include <windows.h>
+
 #include "mainwindow.h"
 #include "./ui_mainwindow.h"
 #include <QNetworkAccessManager>
@@ -103,6 +105,17 @@ void MainWindow::on_globalVariablesButton_clicked()
 
 void MainWindow::startProcess()
 {
+    delete storage_process;
+    storage_process = new QProcess(this);
+    if (!storage_process->isOpen()) {
+        if (!commands_json.isValid() || !global_json.isValid()){
+            ui->statusBar->showMessage(QString("WARNING: modules.json or globals.json does not correctly set up, cannot start listener process"), timeout);
+            return;
+        }
+        QString globalizedCommand = replaceGlobalKeys(commands_json.getJsonObject().value("storage").toObject().value("command").toString(), global_json.getJsonObject());
+        QStringList args = globalizedCommand.split(" ");
+        storage_process->start(args.at(0), args.mid(1));
+    }
     delete process;
     process = new QProcess(this);
     if (!process->isOpen()) {
@@ -129,55 +142,40 @@ void MainWindow::startProcess()
             listener_process->start(args.at(0), args.mid(1));
         }
     }
-    delete storage_process;
-    storage_process = new QProcess(this);
-    if (!storage_process->isOpen()) {
-        if (!commands_json.isValid() || !global_json.isValid()){
-            ui->statusBar->showMessage(QString("WARNING: modules.json or globals.json does not correctly set up, cannot start listener process"), timeout);
-            return;
-        }
-        QString globalizedCommand = replaceGlobalKeys(commands_json.getJsonObject().value("storage").toObject().value("command").toString(), global_json.getJsonObject());
-        QStringList args = globalizedCommand.split(" ");
-        storage_process->start(args.at(0), args.mid(1));
-    }
 }
 
 void MainWindow::stopProcess()
 {
-    if ( !storage_process ) {
-        qDebug() << "Cannot stop process without initialization!";
-        return;
-    }
-    if (storage_process->isOpen()) {
-        storage_process->terminate();
-        storage_process->waitForFinished(0);
-        if (storage_process->state() != QProcess::NotRunning) {
-            storage_process->kill();
+    auto stopQProcess = [](QProcess *process, const QString &name) {
+        if (!process) {
+            qDebug() << QString("Cannot stop %1 without initialization!").arg(name);
+            return;
         }
-    }
-    if ( !process ) {
-        qDebug() << "Cannot stop process without initialization!";
-        return;
-    }
-    if (process->isOpen()) {
-        ui->statusBar->showMessage(QString("Stopped assistant..."), timeout);
-        process->terminate(); // Gracefully ask the process to close
-        process->waitForFinished(0);
-        if (process->state() != QProcess::NotRunning) {
-            process->kill(); // Force kill if it didn't terminate
+        if (process->isOpen()) {
+            process->terminate();
+            if (!process->waitForFinished(0)) { // Wait up to 5 seconds
+                if (process->state() != QProcess::NotRunning) {
+
+                    qint64 pid = process->processId();
+
+                    QProcess taskkillProcess;
+                    QStringList arguments;
+
+                    arguments << QString::number(pid);
+
+                    taskkillProcess.start("killer.exe", arguments);
+                    qDebug() << "killing process";
+                    taskkillProcess.waitForFinished();
+
+
+                }
+            }
         }
-    }
-    if ( !listener_process ) {
-        qDebug() << "Cannot stop process without initialization!";
-        return;
-    }
-    if (listener_process->isOpen()) {
-        listener_process->terminate();
-        listener_process->waitForFinished(0);
-        if (listener_process->state() != QProcess::NotRunning) {
-            listener_process->kill();
-        }
-    }
+    };
+
+    stopQProcess(storage_process, "storage_process");
+    stopQProcess(process, "process");
+    stopQProcess(listener_process, "listener_process");
 }
 
 void MainWindow::readAllStandardOutput()
@@ -481,54 +479,6 @@ void MainWindow::addMessage(QString msg, Role role)
 
 void MainWindow::setButtonIndication(Tab tab)
 {
-/*
-QPushButton
-{
-    background-color: #607cff;
-    color: #ffffff;
-    border-style: solid;
-    border-width: 1px;
-    border-radius: 3px;
-    border-color: #051a39;
-    padding: 5px;
-
-}
-
-
-QPushButton::disabled
-{
-    background-color: #404040;
-    color: #656565;
-    border-color: #051a39;
-
-}
-
-
-QPushButton::hover
-{
-    background-color: #8399ff;
-    color: #ffffff;
-    border-style: solid;
-    border-width: 1px;
-    border-radius: 3px;
-    border-color: #051a39;
-    padding: 5px;
-
-}
-
-
-QPushButton::pressed
-{
-    background-color: #4969ff;
-    color: #ffffff;
-    border-style: solid;
-    border-width: 1px;
-    border-radius: 3px;
-    border-color: #051a39;
-    padding: 5px;
-
-}
-*/
     QString unchecked = QString("QPushButton{background-color: #000000}QPushButton::hover{background-color: #505050;color: #ffffff;border-style: solid;border-width: 1px;border-radius: 3px;border-color: #051a39;padding: 5px;}");
     QString checked = QString("QPushButton{background-color: #607cff}QPushButton::hover{background-color: #8399ff;color: #ffffff;border-style: solid;border-width: 1px;border-radius: 3px;border-color: #051a39;padding: 5px;}");
     ui->globalVariablesButton->setStyleSheet(unchecked);
@@ -970,68 +920,28 @@ QString MainWindow::replaceGlobalKeys(const QString &input, const QJsonObject &j
 
 void MainWindow::sendText(const QString &filename, const QString &text)
 {
-    // QNetworkAccessManager *manager = new QNetworkAccessManager();
 
-    // QUrl serverUrl("http://127.0.0.1:5000/storefile");
-
-    // QHttpMultiPart *multiPart = new QHttpMultiPart(QHttpMultiPart::FormDataType);
-
-    // QHttpPart filenamePart;
-    // filenamePart.setHeader(QNetworkRequest::ContentDispositionHeader, QVariant("form-data; name=\"filename\""));
-    // filenamePart.setBody(filename.toUtf8());
-    // multiPart->append(filenamePart);
-
-    // QHttpPart filePart;
-    // filePart.setHeader(QNetworkRequest::ContentDispositionHeader, QVariant("form-data; name=\"file\"; filename=\"" + filename + "\""));
-    // filePart.setBody(text.toUtf8());
-    // multiPart->append(filePart);
-
-    // QNetworkRequest request(serverUrl);
-    // request.setHeader(QNetworkRequest::ContentTypeHeader, QVariant("multipart/form-data; boundary=" + multiPart->boundary()));
-
-    // QNetworkReply *reply = manager->post(request, multiPart);
-    // multiPart->setParent(reply);
-
-    // QObject::connect(reply, &QNetworkReply::finished, [=]() {
-    //     if (reply->error() == QNetworkReply::NoError) {
-    //         qDebug() << "File uploaded successfully:" << reply->readAll();
-    //     } else {
-    //         qDebug() << "Error uploading file:" << reply->errorString();
-    //     }
-
-    //     reply->deleteLater();
-    //     manager->deleteLater();
-    // });
-
-    // Create a network manager for this request
     QNetworkAccessManager *manager = new QNetworkAccessManager();
 
-    // Define the server URL
     QUrl serverUrl("http://127.0.0.1:5000/storefile");
 
-    // Create a multipart object for the form data
     QHttpMultiPart *multiPart = new QHttpMultiPart(QHttpMultiPart::FormDataType);
 
-    // Add the "filename" form field
     QHttpPart filenamePart;
     filenamePart.setHeader(QNetworkRequest::ContentDispositionHeader, QVariant("form-data; name=\"filename\""));
     filenamePart.setBody(filename.toUtf8());
     multiPart->append(filenamePart);
 
-    // Add the "file" form field with the text as binary data
     QHttpPart filePart;
     filePart.setHeader(QNetworkRequest::ContentDispositionHeader, QVariant("form-data; name=\"file\"; filename=\"" + filename + "\""));
     filePart.setBody(text.toUtf8());
     multiPart->append(filePart);
 
-    // Create the request
     QNetworkRequest request(serverUrl);
 
-    // Send the POST request asynchronously
     QNetworkReply *reply = manager->post(request, multiPart);
-    multiPart->setParent(reply); // Ensures the multipart is deleted with the reply
+    multiPart->setParent(reply);
 
-    // Connect to the reply's finished signal
     QObject::connect(reply, &QNetworkReply::finished, [reply, manager]() {
         if (reply->error() == QNetworkReply::NoError) {
             qDebug() << "Upload successful:" << reply->readAll();
@@ -1039,7 +949,7 @@ void MainWindow::sendText(const QString &filename, const QString &text)
             qDebug() << "Error occurred:" << reply->errorString();
         }
 
-        // Cleanup
+        // cleanup
         reply->deleteLater();
         manager->deleteLater();
     });

@@ -43,3 +43,11 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
 
 RC_ICONS = appicon.ico
+
+
+# win32 {
+#     CONFIG += console
+#     DEFINES += UNICODE _UNICODE
+#     INCLUDEPATH += $$[QT_INSTALL_PREFIX]/include
+#     LIBS += -lkernel32 -luser32 -ladvapi32
+# }

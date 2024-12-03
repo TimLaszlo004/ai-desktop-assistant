@@ -5,10 +5,19 @@ from os import path
 import wave
 import argparse
 from pynput import keyboard
-# import audioop
 from pycaw.pycaw import AudioUtilities, ISimpleAudioVolume
 import io
 import filemanager
+
+import signal
+import sys
+
+def handle_signal(signum, frame):
+    print(f"Received signal {signum}, cleaning up...")
+    sys.exit(0)
+
+signal.signal(signal.SIGTERM, handle_signal)
+signal.signal(signal.SIGINT, handle_signal)
 
 DEBUG = False
 
@@ -26,9 +35,6 @@ def get_default_device_index(p):
         print("No default input device found.")
         return None
 
-# p = pyaudio.PyAudio()
-# print(get_default_device_index(p))
-# exit()
 
 def detect_speech_from_microphone():
     global count
@@ -39,7 +45,6 @@ def detect_speech_from_microphone():
     # Initialize PyAudio
     p = pyaudio.PyAudio()
 
-    # Define audio stream parameters
     sample_rate = 16000
     frame_duration = 30  # ms
     frame_size = int(sample_rate * frame_duration / 1000)
@@ -77,7 +82,6 @@ def detect_speech_from_microphone():
         num_voiced = len([f for f, speech in ring_buffer if speech])
 
         if not triggered:
-            # print(f'{num_voiced} vs {0.5 * len(ring_buffer)}: is the first bigger?')
             if num_voiced > 0.5 * len(ring_buffer):
                 triggered = True
                 print('LISTENER::triggered')
@@ -112,13 +116,6 @@ def detect_speech_from_microphone():
 
 
 
-# def is_audio_playing():
-#     sessions = AudioUtilities.GetAllSessions()
-#     for session in sessions:
-#         if session.State == 1 and session.Process and 'py' not in session.Process.name():  # State == 1 means the audio session is active
-#             print(session.Process.name())
-#             return True
-#     return False
 def is_audio_playing():
     sessions = AudioUtilities.GetAllSessions()
     for session in sessions:
@@ -142,7 +139,8 @@ if target_directory == '':
 file_name  = args.file_name
 filter_mode = args.filter_scale
 input_handling_mode = args.input_mute_level
-### TODO
+
+### TODO: there is no proper way to implement this on Windows, but mode 0 is sufficient
 if input_handling_mode == 1:
     input_handling_mode = 0
 ###

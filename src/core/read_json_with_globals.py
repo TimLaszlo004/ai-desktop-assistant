@@ -1,7 +1,6 @@
 import json
 
 def read_with_replaced_globals(file_name:str, globals_name:str):
-    # global_variables = None
     with open(file_name, 'r') as file:
         content = file.read()
         with open(globals_name, 'rb') as g_file:

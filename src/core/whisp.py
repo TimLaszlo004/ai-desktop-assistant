@@ -5,11 +5,13 @@ import filemanager
 import io
 
 DEBUG = False
+LOGGING = False
 
 def log(msg:str):
-    with open('logfile.txt', 'a') as file:
-        file.write(msg)
-        file.write('\n')
+    if LOGGING:
+        with open('logfile.txt', 'a') as file:
+            file.write(msg)
+            file.write('\n')
 
 def init(arguments:list):
     for i in range(len(arguments)):
@@ -94,7 +96,6 @@ if __name__ == '__main__':
         audio_file.name = "dummy.wav" # openai checks file extension, so a name is required
     
     if audio_file == None:
-        # filemanager.delete_file(args.file_name)
         exit()
     transcription = client.audio.transcriptions.create(
         model="whisper-1",

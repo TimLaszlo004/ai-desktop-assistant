@@ -1,9 +1,12 @@
 import requests
 
+LOGGING = False
+
 def log(msg:str):
-    with open('logfile.txt', 'a') as file:
-        file.write(msg)
-        file.write('\n')
+    if LOGGING:
+        with open('logfile.txt', 'a') as file:
+            file.write(msg)
+            file.write('\n')
 
 
 BASE_URL = 'http://127.0.0.1:5000'
@@ -12,8 +15,6 @@ def store_file(filename, file):
     try:
         normalized_filename = filename.replace('\\\\', '\\')
         
-        # trigger.log(f'stored: {normalized_filename}')
-        # toast('Assistant', f'Stored: {normalized_filename}')
         files = {'file': (normalized_filename, file), 'filename': (None, normalized_filename)}
         response = requests.post(f'{BASE_URL}/storefile', files=files)
         log(f'FILEMANAGER STORED: {normalized_filename}')

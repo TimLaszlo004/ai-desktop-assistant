@@ -3,8 +3,6 @@
 
 #include <QWidget>
 #include <QtWidgets>
-// #include <QtCore>
-// #include <QtGui>
 
 class MainWindow;
 
